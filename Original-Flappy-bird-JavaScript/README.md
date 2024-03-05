@@ -1,23 +1,44 @@
-# Original-Flappy-bird-JavaScript
-Create Original Flappy Bird With JavaScript
+# Run For Your Life Exercise Video Game
+A scrolling background game using exercise tracking technology to make stationary exercise equipment more fun and effective.
 
-Flappy Bird was a side-scrolling mobile game featuring 2D retro style graphics. The objective was to direct a flying bird, named "Faby", who moves continuously to the right, between sets of Mario-like pipes. If the player touches the pipes, they lose. Faby briefly flaps upward each time that the player taps the screen; if the screen is not tapped, Faby falls because of gravity; each pair of pipes that he navigates between earns the player a single point, with medals awarded for the score at the end of the game. No medal is awarded to scores less than ten. A bronze medal is given to scores between ten and twenty. In order to receive the silver medal, the player must reach 20 points. The gold medal is given to those who score higher than thirty points. Players who achieve a score of forty or higher receive a platinum medal. Android devices enabled the access of world leaderboards, through Google Play.
+TO DO
+SPRITES
+- get new sprite 
+- animate sprite to simulate running motion
+- change sprite appearance upon game successes and failures - perhaps grow or shrink or get stickers patches or holes
 
-There is no variation or evolution in gameplay throughout the game, as the pipes always have the same gap between them and there is no end to the running track, having only the flap and ding sounds and the rising score as rewards.
+-- QUESTION - the sprite images are all contained on a png file.  how does the game select any particular image (i.e. pipes, bird, FG, BG) 
 
-And today you're going to create the Flappy Bird game using JavaScript and HTML (or HTML5 canvas).
+- SOUNDS
+- get new sound for gameplay
+- find sounds for game successes and failures
 
-We're not using any framework to build the game, Just Vanilla JavaScript.
+GAMEPLAY
+- eliminate game ending upon collisions
 
-This is a beginner's guide on how to create the flappy bird game using JavaScript and HTML.
+SCORE
+- increase score for good collisions, decrease for unwanted collisions --- possibly related to game states
+--scoring is incremented on line 288
 
-To follow the tutorial step by step, please download the starter template, and then follow this link:
 
-https://youtu.be/0ArCFchlTq4
+- slow down scrolling speed
+- set altitude/y-position to number of clicks per second or divided by some amount to basically increase or decrease height based on how fast the user clicks or hits a button
+- - CLICKING CURRENTLY AFFECTS SPEED - we need to change to AFFECTING POSITION
 
-*************
-Social Media
-*************
+--change game states 
+-- no game over or end based on a chosen setting (time, frame_length, or user_choice)
+--
 
-Facebook : https://web.facebook.com/codeeplainedorg
-Twitter : https://twitter.com/code_explained
+--CLICKING TO CHANGE POSITION
+-- line 162, 163 - in update method - determine SPEED
+            this.speed += this.gravity;      gravity is 4.6 
+            this.y += this.speed;
+
+            --NOTE - pipes have a "position" input p - then p.x changes the x position -- line221
+-- lines 178 179 -   speedReset : function(){  //sets speed to 0 at beginning of game
+        this.speed = 0;
+
+
+        WHAT MAKES THE RABBIT CHANGE DIRECTION (up/down???)  - line 58 - 
+
+        --can't get increased clicks to increase speed -- look at lines 170 - 175

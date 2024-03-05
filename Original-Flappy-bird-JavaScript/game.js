@@ -10,6 +10,10 @@ const DEGREE = Math.PI/180;
 const sprite = new Image();
 sprite.src = "img/sprite.png";
 
+//LOAD RABBIT IMAGE
+const rabbit = new Image();
+rabbit.src = "img/rabbit_up.png";  //does not load
+
 // LOAD SOUNDS
 const SCORE_S = new Audio();
 SCORE_S.src = "audio/sfx_point.wav";
@@ -42,16 +46,21 @@ const startBtn = {
     h : 29
 }
 
-// CONTROL THE GAME
+// CONTROL THE GAME -- this detects user clicks - calls the reset methods for all objects to create movement, scoring, etc
 cvs.addEventListener("click", function(evt){
     switch(state.current){
         case state.getReady:
             state.current = state.game;
-            SWOOSHING.play();
+            SWOOSHING.play();  //play sounds
             break;
         case state.game:
-            if(bird.y - bird.radius <= 0) return;
-            bird.flap();
+            if(bird.y - bird.radius <= 0) return;  //if the bird goes below the scr
+           if(bird.y>50){
+            bird.flap();  //go up
+           }
+           else {
+            bird.gravit(); //go down
+           }
             FLAP.play();
             break;
         case state.over:
@@ -70,10 +79,9 @@ cvs.addEventListener("click", function(evt){
     }
 });
 
-
 // BACKGROUND
 const bg = {
-    sX : 0,
+    sX :0,
     sY : 0,
     w : 275,
     h : 226,
@@ -87,104 +95,107 @@ const bg = {
     }
     
 }
+// NEW IMAGE
+// const testImage = {
+//     sX: 276,
+//     sY: 0,
+//     w: 10,
+//     h: 10,  //height of brown rectangle at bottom of screen
+//     x: 200,  //i think starting position (far left) for brown rectangle
+//     y: cvs.height - 112,
+//     dx : 2,    
+//     draw : function(){
+//        ctx.drawImage(sprite, this.sX, this.sY, this.w, this.h, this.x, this.y, this.w, this.h);
+        
+//        ctx.drawImage(sprite, this.sX, this.sY, this.w, this.h, this.x + this.w, this.y, this.w, this.h);
+//     },  
+//     update: function(){
+//         if(state.current == state.game){
+//             this.x = (this.x - this.dx)%(this.w/4);
+//         }
+//     }
+// }
 
 // FOREGROUND
 const fg = {
-    sX: 276,
-    sY: 0,
-    w: 224,
-    h: 112,
-    x: 0,
-    y: cvs.height - 112,
-    
-    dx : 2,
-    
+    sX: 20,
+    sY: 20,
+    w: 20,
+    h: 20,  //height of brown rectangle at bottom of screen
+    x: 50,  //i think starting position (far left) for brown rectangle
+    y: 50,
+    dx : 2,    
     draw : function(){
-        ctx.drawImage(sprite, this.sX, this.sY, this.w, this.h, this.x, this.y, this.w, this.h);
-        
-        ctx.drawImage(sprite, this.sX, this.sY, this.w, this.h, this.x + this.w, this.y, this.w, this.h);
-    },
-    
+    //     ctx.drawImage(sprite, this.sX, this.sY, this.w, this.h, this.x, this.y, this.w, this.h);
+    //     ctx.drawImage(sprite, this.sX, this.sY, this.w, this.h, this.x + this.w, this.y, this.w, this.h);
+    },  
     update: function(){
         if(state.current == state.game){
-            this.x = (this.x - this.dx)%(this.w/2);
+            this.x = (this.x - this.dx)%(this.w/4);
+            this.y = (this.y);
         }
     }
 }
-
-// BIRD
+// BIRD / RABBIT
 const bird = {
-    animation : [
+    animation : [  // changes sprite to four different pictures to simulate motion
         {sX: 276, sY : 112},
         {sX: 276, sY : 139},
         {sX: 276, sY : 164},
         {sX: 276, sY : 139}
     ],
     x : 50,
-    y : 150,
+    y : 150,  //changed to 150 - jump - 1 >> did not work.  screen went completely white
     w : 34,
     h : 26,
     
     radius : 12,
-    
     frame : 0,
-    
-    gravity : 0.25,
-    jump : 4.6,
+    gravity : 0.0025,  //changed to 0 gravity from .25  - bird flies UP off the screen
+    jump : .001, //changed jump from 4.6 to .1  - bird goes SLOWLY up off the screen -- clicking does NOT change bird
     speed : 0,
     rotation : 0,
+    UPSPEED : .15,
+    
     
     draw : function(){
         let bird = this.animation[this.frame];
         
         ctx.save();
         ctx.translate(this.x, this.y);
-        ctx.rotate(this.rotation);
-        ctx.drawImage(sprite, bird.sX, bird.sY, this.w, this.h,- this.w/2, - this.h/2, this.w, this.h);
-        
+     //   ctx.rotate(this.rotation);  //rotates up and down for direction of flight
+      //  ctx.drawImage(sprite, bird.sX, bird.sY, this.w, this.h,- this.w/2, - this.h/2, this.w, this.h);  
+        ctx.drawImage(rabbit, this.w, this.h );  //draws the rabbit
         ctx.restore();
+        
     },
-    
-    flap : function(){
-        this.speed = - this.jump;
+    gravit : function(){            //newly created function intended to cause bird to decrease altitude on click based on Y position
+        this.speed += this.UPSPEED;
+         this.jump += this.UPSPEED;  //this.jump += 1;  
     },
+    flap : function(){  //NOTE -  flap() IS NOT inside update function.  only occurs on user mouse click
+      this.speed = -this.UPSPEED;
+      this.jump -= this.UPSPEED;  //this.jump -= 1;// flap happens on click - more clicks = more speed  // 
+    },     // changed - this jump to + this jump - nothing changed
     
     update: function(){
-        // IF THE GAME STATE IS GET READY STATE, THE BIRD MUST FLAP SLOWLY
-        this.period = state.current == state.getReady ? 10 : 5;
-        // WE INCREMENT THE FRAME BY 1, EACH PERIOD
-        this.frame += frames%this.period == 0 ? 1 : 0;
-        // FRAME GOES FROM 0 To 4, THEN AGAIN TO 0
-        this.frame = this.frame%this.animation.length;
-        
+        // IF THE GAME STATE IS GET READY STATE, THE BIRD MUST FLAP SLOWLY - THIS ALL MAKES THE BIRD APPEAR TO FLAP ITS WINGS - NOT NEEDED
+//deleted
         if(state.current == state.getReady){
-            this.y = 150; // RESET POSITION OF THE BIRD AFTER GAME OVER
-            this.rotation = 0 * DEGREE;
-        }else{
-            this.speed += this.gravity;
-            this.y += this.speed;
-            
-            if(this.y + this.h/2 >= cvs.height - fg.h){
-                this.y = cvs.height - fg.h - this.h/2;
-                if(state.current == state.game){
-                    state.current = state.over;
-                    DIE.play();
-                }
-            }
-            
-            // IF THE SPEED IS GREATER THAN THE JUMP MEANS THE BIRD IS FALLING DOWN
-            if(this.speed >= this.jump){
-                this.rotation = 90 * DEGREE;
-                this.frame = 1;
-            }else{
-                this.rotation = -25 * DEGREE;
-            }
+
         }
-        
-    },
-    speedReset : function(){
-        this.speed = 0;
-    }
+        else{
+            this.speed += this.gravity;       //updates the current speed
+            this.y += this.speed;             //moves bird up or down based on current speed
+            
+            // if(this.y + this.h/2 >= cvs.height - fg.h){
+            //     this.y = cvs.height - fg.h - this.h/2;
+            // }
+        }  
+    }// deleted comma
+    // speedReset : function(){  //updates the speed to 0 when game begins
+    //     this.speed = 0;
+    // }
 }
 
 // GET READY MESSAGE
@@ -204,102 +215,7 @@ const getReady = {
     
 }
 
-// GAME OVER MESSAGE
-const gameOver = {
-    sX : 175,
-    sY : 228,
-    w : 225,
-    h : 202,
-    x : cvs.width/2 - 225/2,
-    y : 90,
-    
-    draw: function(){
-        if(state.current == state.over){
-            ctx.drawImage(sprite, this.sX, this.sY, this.w, this.h, this.x, this.y, this.w, this.h);   
-        }
-    }
-    
-}
-
-// PIPES
-const pipes = {
-    position : [],
-    
-    top : {
-        sX : 553,
-        sY : 0
-    },
-    bottom:{
-        sX : 502,
-        sY : 0
-    },
-    
-    w : 53,
-    h : 400,
-    gap : 85,
-    maxYPos : -150,
-    dx : 2,
-    
-    draw : function(){
-        for(let i  = 0; i < this.position.length; i++){
-            let p = this.position[i];
-            
-            let topYPos = p.y;
-            let bottomYPos = p.y + this.h + this.gap;
-            
-            // top pipe
-            ctx.drawImage(sprite, this.top.sX, this.top.sY, this.w, this.h, p.x, topYPos, this.w, this.h);  
-            
-            // bottom pipe
-            ctx.drawImage(sprite, this.bottom.sX, this.bottom.sY, this.w, this.h, p.x, bottomYPos, this.w, this.h);  
-        }
-    },
-    
-    update: function(){
-        if(state.current !== state.game) return;
-        
-        if(frames%100 == 0){
-            this.position.push({
-                x : cvs.width,
-                y : this.maxYPos * ( Math.random() + 1)
-            });
-        }
-        for(let i = 0; i < this.position.length; i++){
-            let p = this.position[i];
-            
-            let bottomPipeYPos = p.y + this.h + this.gap;
-            
-            // COLLISION DETECTION
-            // TOP PIPE
-            if(bird.x + bird.radius > p.x && bird.x - bird.radius < p.x + this.w && bird.y + bird.radius > p.y && bird.y - bird.radius < p.y + this.h){
-                state.current = state.over;
-                HIT.play();
-            }
-            // BOTTOM PIPE
-            if(bird.x + bird.radius > p.x && bird.x - bird.radius < p.x + this.w && bird.y + bird.radius > bottomPipeYPos && bird.y - bird.radius < bottomPipeYPos + this.h){
-                state.current = state.over;
-                HIT.play();
-            }
-            
-            // MOVE THE PIPES TO THE LEFT
-            p.x -= this.dx;
-            
-            // if the pipes go beyond canvas, we delete them from the array
-            if(p.x + this.w <= 0){
-                this.position.shift();
-                score.value += 1;
-                SCORE_S.play();
-                score.best = Math.max(score.value, score.best);
-                localStorage.setItem("best", score.best);
-            }
-        }
-    },
-    
-    reset : function(){
-        this.position = [];
-    }
-    
-}
+// PIPES -- deleted 100 lines of pipes code
 
 // SCORE
 const score= {
@@ -325,11 +241,26 @@ const score= {
             ctx.fillText(this.best, 225, 228);
             ctx.strokeText(this.best, 225, 228);
         }
-    },
-    
+    },  
     reset : function(){
         this.value = 0;
     }
+}
+// GAME OVER MESSAGE
+const gameOver = {
+    sX : 175,
+    sY : 228,
+    w : 225,
+    h : 202,
+    x : cvs.width/2 - 225/2,
+    y : 90,
+    
+    draw: function(){
+        if(state.current == state.over){
+            ctx.drawImage(sprite, this.sX, this.sY, this.w, this.h, this.x, this.y, this.w, this.h);   
+        }
+    }
+    
 }
 
 // DRAW
@@ -338,7 +269,7 @@ function draw(){
     ctx.fillRect(0, 0, cvs.width, cvs.height);
     
     bg.draw();
-    pipes.draw();
+  //  pipes.draw();
     fg.draw();
     bird.draw();
     getReady.draw();
@@ -348,14 +279,14 @@ function draw(){
 
 // UPDATE
 function update(){
-    bird.update();
+    bird.update();  //bird includes the gravity increment, but not flap().  flap only occurs on click.  so gravity grows continuously
     fg.update();
-    pipes.update();
+  //  pipes.update();
 }
 
 // LOOP
-function loop(){
-    update();
+function loop(){  //these loops are themselves getting looped
+    update();  
     draw();
     frames++;
     
